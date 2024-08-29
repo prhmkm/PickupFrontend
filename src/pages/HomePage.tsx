@@ -23,7 +23,7 @@ const HomePage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [itemDetails, setItemDetails] = useState<any[]>([]);
-  const [pageSize, setPageSize] = useState<number>(10); // تعداد آیتم‌ها در هر صفحه
+  const [pageSize, setPageSize] = useState<number>(5); // تعداد آیتم‌ها در هر صفحه
   const [pageNumber, setPageNumber] = useState<number>(1); // شماره صفحه فعلی
   const token = localStorage.getItem("token") || "";
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -174,7 +174,7 @@ const HomePage: React.FC = () => {
                 ))}
               </Stack>
             ) : (
-              <Text>Loading...</Text>
+              <Text>Nothing!</Text>
             )}
           </ModalBody>
           <ModalFooter>
