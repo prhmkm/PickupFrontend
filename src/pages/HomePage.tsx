@@ -132,10 +132,12 @@ const HomePage: React.FC = () => {
                 onChange={(e) => changePageNumber(e.target.value)}
                 ml={4}
               >
-                <option value={1}>1</option>
-                <option value={2}>2</option>
-                <option value={3}>3</option>
-                <option value={4}>4</option>
+                {pageNumber === 1 ? null : (
+                  <option value={pageNumber - 1}>{pageNumber - 1}</option>
+                )}
+                <option value={pageNumber}>{pageNumber}</option>
+                <option value={pageNumber + 1}>{pageNumber + 1}</option>
+                <option value={pageNumber + 2}>{pageNumber + 2}</option>
               </Select>
               <Text ml={2}>Page Number</Text>
             </Flex>
