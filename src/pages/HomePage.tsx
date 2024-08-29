@@ -38,19 +38,37 @@ const HomePage: React.FC = () => {
     loadData();
   }, [token]);
 
-  const handleItemClick = async (item: any) => {
-    setSelectedItem(item);
-    const details = await fetchItemDetails(
-      item.id,
-      token,
-      pageSize,
-      pageNumber
-    );
-    if (details && details.value && details.value.response) {
-      setItemDetails(details.value.response);
+  useEffect(() => {
+    if (selectedItem) {
+      const fetchDetails = async () => {
+        const details = await fetchItemDetails(
+          selectedItem.id,
+          token,
+          pageSize,
+          pageNumber
+        );
+        if (details && details.value && details.value.response) {
+          setItemDetails(details.value.response);
+        }
+      };
+      fetchDetails();
     }
+  }, [selectedItem, pageSize, pageNumber, token]);
+
+  const handleItemClick = (item: any) => {
+    setSelectedItem(item);
     onOpen();
   };
+
+  function changePageNumber(value: string) {
+    const newPageNumber = parseInt(value);
+    setPageNumber(newPageNumber);
+  }
+
+  function changePageSize(value: string) {
+    const newPageSize = parseInt(value);
+    setPageSize(newPageSize);
+  }
 
   return (
     <Flex
@@ -99,7 +117,7 @@ const HomePage: React.FC = () => {
             <Flex mb={4} align="center">
               <Select
                 value={pageSize}
-                onChange={(e) => setPageSize(parseInt(e.target.value))}
+                onChange={(e) => changePageSize(e.target.value)}
                 mr={4}
               >
                 <option value={5}>5</option>
@@ -111,7 +129,7 @@ const HomePage: React.FC = () => {
 
               <Select
                 value={pageNumber}
-                onChange={(e) => setPageNumber(parseInt(e.target.value))}
+                onChange={(e) => changePageNumber(e.target.value)}
                 ml={4}
               >
                 <option value={1}>1</option>
