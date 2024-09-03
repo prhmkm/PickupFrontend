@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchData, fetchItemDetails } from "../services/api";
+import { fetchData, fetchItemDetails, deleteBucket } from "../services/api";
 import {
   Box,
   Heading,
@@ -17,16 +17,28 @@ import {
   Flex,
   Stack,
   Select,
+  IconButton,
+  VStack,
+  HStack,
+  Divider,
+  // Progress,
 } from "@chakra-ui/react";
+import { DeleteIcon } from "@chakra-ui/icons";
 
 const HomePage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [itemDetails, setItemDetails] = useState<any[]>([]);
-  const [pageSize, setPageSize] = useState<number>(5); // تعداد آیتم‌ها در هر صفحه
-  const [pageNumber, setPageNumber] = useState<number>(1); // شماره صفحه فعلی
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [bucketToDelete, setBucketToDelete] = useState<number | null>(null);
   const token = localStorage.getItem("token") || "";
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,6 +72,24 @@ const HomePage: React.FC = () => {
     onOpen();
   };
 
+  const handleDeleteClick = (id: number) => {
+    setBucketToDelete(id);
+    onDeleteOpen();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (bucketToDelete !== null) {
+      await deleteBucket(bucketToDelete, token);
+      setBucketToDelete(null);
+      onDeleteClose();
+      // Refresh data after deletion
+      const result = await fetchData(token);
+      if (result && result.value && result.value.response) {
+        setData(result.value.response);
+      }
+    }
+  };
+
   function changePageNumber(value: string) {
     const newPageNumber = parseInt(value);
     setPageNumber(newPageNumber);
@@ -74,16 +104,22 @@ const HomePage: React.FC = () => {
     <Flex
       direction="column"
       align="center"
-      justify="center"
-      h="100vh"
-      bgGradient="linear(to-br, blue.300, purple.500)"
+      justify="flex-start"
+      minH="100vh"
+      bgGradient="linear(to-br, teal.400, blue.500)"
       p={6}
+      color="white"
     >
-      <Box maxW="6xl" w="100%">
-        <Heading mb="6" color="white" textAlign="center">
-          Active Buckets
+      <Box maxW="6xl" w="100%" mb={8} textAlign="center">
+        <Heading size="xl" mb={4}>
+          Welcome to GWM
         </Heading>
-        <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
+        <Heading size="md" fontWeight="normal">
+          Smart Oil Meter Pro Panel
+        </Heading>
+      </Box>
+      <Box maxW="6xl" w="100%">
+        <Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={6}>
           {data.map((item) => (
             <GridItem
               key={item.id}
@@ -91,18 +127,35 @@ const HomePage: React.FC = () => {
               bg="white"
               borderRadius="md"
               boxShadow="lg"
-              cursor="pointer"
-              onClick={() => handleItemClick(item)}
+              position="relative"
+              _hover={{ boxShadow: "2xl" }}
             >
-              <Stack spacing={2}>
-                <Text fontWeight="bold">
-                  Serial Number: {item.serialNumber}
-                </Text>
-                <Text>
+              <VStack align="start" spacing={3}>
+                <HStack justify="space-between" w="100%">
+                  <Text fontSize="lg" fontWeight="bold" color="gray.700">
+                    Serial Number: {item.serialNumber}
+                  </Text>
+                  <IconButton
+                    aria-label="Delete bucket"
+                    icon={<DeleteIcon />}
+                    colorScheme="red"
+                    variant="ghost"
+                    onClick={() => handleDeleteClick(item.id)}
+                  />
+                </HStack>
+                <Divider />
+                <Text color="gray.600">
                   Creation Date:{" "}
                   {new Date(item.creationDatetime).toLocaleString()}
                 </Text>
-              </Stack>
+                <Button
+                  size="sm"
+                  colorScheme="teal"
+                  onClick={() => handleItemClick(item)}
+                >
+                  View Details
+                </Button>
+              </VStack>
             </GridItem>
           ))}
         </Grid>
@@ -180,6 +233,25 @@ const HomePage: React.FC = () => {
           <ModalFooter>
             <Button colorScheme="blue" onClick={onClose}>
               Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal تایید حذف */}
+      <Modal isOpen={isDeleteOpen} onClose={onDeleteClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete Confirmation</ModalHeader>
+          <ModalBody>
+            <Text>Are you sure you want to delete this bucket?</Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" mr={3} onClick={handleDeleteConfirm}>
+              Yes
+            </Button>
+            <Button variant="ghost" onClick={onDeleteClose}>
+              No
             </Button>
           </ModalFooter>
         </ModalContent>

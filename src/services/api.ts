@@ -55,3 +55,18 @@ export const fetchItemDetails = async (id: number, token: string, pageSize: numb
         return null;
     }
 };
+
+export const deleteBucket = async (id: number, token: string): Promise<any> => {
+    try {
+        const response = await api.post(`/Admin/Bucket/BODeleteBucket`, null, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                id: id.toString(),
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Deleting bucket failed', error);
+        return null;
+    }
+};
