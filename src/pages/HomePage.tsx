@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { fetchData, fetchItemDetails, deleteBucket } from "../services/api";
 import {
   Box,
   Heading,
@@ -15,14 +14,18 @@ import {
   Button,
   Text,
   Flex,
-  Stack,
   Select,
-  IconButton,
   VStack,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
   HStack,
+  IconButton,
   Divider,
-  // Progress,
 } from "@chakra-ui/react";
+import { deleteBucket, fetchData, fetchItemDetails } from "../services/api";
 import { DeleteIcon } from "@chakra-ui/icons";
 
 const HomePage: React.FC = () => {
@@ -90,15 +93,25 @@ const HomePage: React.FC = () => {
     }
   };
 
-  function changePageNumber(value: string) {
-    const newPageNumber = parseInt(value);
-    setPageNumber(newPageNumber);
-  }
+  const resetModal = () => {
+    // Reset when modal is closed
+    setPageSize(5);
+    setPageNumber(1);
+    setItemDetails([]);
+    onClose();
+  };
 
-  function changePageSize(value: string) {
-    const newPageSize = parseInt(value);
-    setPageSize(newPageSize);
-  }
+  const changePageNumber = (value: string) => {
+    setPageNumber(parseInt(value));
+    // Reset data when page number changes
+    setItemDetails([]);
+  };
+
+  const changePageSize = (value: string) => {
+    setPageSize(parseInt(value));
+    // Reset data when page size changes
+    setItemDetails([]);
+  };
 
   return (
     <Flex
@@ -114,10 +127,18 @@ const HomePage: React.FC = () => {
         <Heading size="xl" mb={4}>
           Welcome to GWM
         </Heading>
-        <Heading size="md" fontWeight="normal">
-          Smart Oil Meter Pro Panel
-        </Heading>
+        <Flex alignItems="center" justifyContent="center">
+          <Heading size="md" fontWeight="normal" mr={4}>
+            Smart Oil Meter Pro Panel
+          </Heading>
+          <img
+            src="\Logo-site.png"
+            alt="Logo"
+            style={{ width: "50px", height: "50px" }}
+          />
+        </Flex>
       </Box>
+
       <Box maxW="6xl" w="100%">
         <Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={6}>
           {data.map((item) => (
@@ -162,7 +183,7 @@ const HomePage: React.FC = () => {
       </Box>
 
       {/* Popup برای نمایش جزئیات */}
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <Modal isOpen={isOpen} onClose={resetModal} size="xl">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Item Details</ModalHeader>
@@ -194,44 +215,58 @@ const HomePage: React.FC = () => {
               </Select>
               <Text ml={2}>Page Number</Text>
             </Flex>
-            {itemDetails.length > 0 ? (
-              <Stack spacing={4}>
-                {itemDetails.map((detail) => (
-                  <Box
-                    key={detail.id}
-                    p={4}
-                    bg="gray.100"
-                    borderRadius="md"
-                    boxShadow="sm"
-                  >
-                    <Text>
-                      <strong>ID:</strong> {detail.id}
-                    </Text>
-                    <Text>
-                      <strong>Serial Number:</strong> {detail.serialNumber}
-                    </Text>
-                    <Text>
-                      <strong>Battery Amount:</strong> {detail.batteryAmount}
-                    </Text>
-                    <Text>
-                      <strong>Device Status:</strong> {detail.deviceStatus}
-                    </Text>
-                    <Text>
-                      <strong>Tank Volume:</strong> {detail.tankVolume}
-                    </Text>
-                    <Text>
-                      <strong>Creation Date:</strong>{" "}
-                      {new Date(detail.creationDatetime).toLocaleString()}
-                    </Text>
-                  </Box>
-                ))}
-              </Stack>
+
+            {/* نمایش پیام "Nothing..." در صورت خالی بودن داده‌ها */}
+            {itemDetails.length === 0 ? (
+              <Text textAlign="center" color="gray.500" fontStyle="italic">
+                Nothing...
+              </Text>
             ) : (
-              <Text>Nothing!</Text>
+              <Accordion
+                defaultIndex={itemDetails.map((_, i) => i)}
+                allowMultiple
+              >
+                {itemDetails.map((detail) => (
+                  <AccordionItem key={detail.id}>
+                    <h2>
+                      <AccordionButton>
+                        <Box flex="1" textAlign="left">
+                          {/* نمایش creationDatetime و tankVolume به جای serialNumber */}
+                          <Text fontWeight="bold">
+                            Creation Date:{" "}
+                            {new Date(detail.creationDatetime).toLocaleString()}
+                          </Text>
+                          {/* <Text>Tank Volume: {detail.tankVolume}</Text> */}
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                      <Text>
+                        <strong>ID:</strong> {detail.id}
+                      </Text>
+                      <Text>
+                        <strong>Battery Amount:</strong> {detail.batteryAmount}
+                      </Text>
+                      <Text>
+                        <strong>Device Status:</strong> {detail.deviceStatus}
+                      </Text>
+                      <Text>
+                        <strong>Tank Volume:</strong> {detail.tankVolume}{" "}
+                      </Text>
+                      <Text>
+                        <strong>Creation Date:</strong>{" "}
+                        {new Date(detail.creationDatetime).toLocaleString()}
+                      </Text>
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             )}
           </ModalBody>
+
           <ModalFooter>
-            <Button colorScheme="blue" onClick={onClose}>
+            <Button colorScheme="blue" mr={3} onClick={resetModal}>
               Close
             </Button>
           </ModalFooter>
