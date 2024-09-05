@@ -30,6 +30,7 @@ import { DeleteIcon } from "@chakra-ui/icons";
 
 const HomePage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
+  const [doFetch, setDoFetch] = useState<boolean>(true);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [itemDetails, setItemDetails] = useState<any[]>([]);
   const [pageSize, setPageSize] = useState<number>(5);
@@ -68,10 +69,11 @@ const HomePage: React.FC = () => {
       };
       fetchDetails();
     }
-  }, [selectedItem, pageSize, pageNumber, token]);
+  }, [selectedItem, pageSize, pageNumber, token, doFetch]);
 
   const handleItemClick = (item: any) => {
     setSelectedItem(item);
+    setDoFetch(!doFetch);
     onOpen();
   };
 
