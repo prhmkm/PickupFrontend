@@ -27,6 +27,7 @@ import {
 } from "@chakra-ui/react";
 import { deleteBucket, fetchData, fetchItemDetails } from "../services/api";
 import { DeleteIcon } from "@chakra-ui/icons";
+import BatteryIcon from "../components/BatteryIcon";
 
 const HomePage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
@@ -158,6 +159,8 @@ const HomePage: React.FC = () => {
                   <Text fontSize="lg" fontWeight="bold" color="gray.700">
                     Serial Number: {item.serialNumber}
                   </Text>
+                  {/* اضافه کردن آیکون باطری */}
+                  <BatteryIcon batteryAmount={item.batteryAmount} />
                   <IconButton
                     aria-label="Delete bucket"
                     icon={<DeleteIcon />}
