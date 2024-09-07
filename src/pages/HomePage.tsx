@@ -24,16 +24,33 @@ import {
   HStack,
   IconButton,
   Divider,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { deleteBucket, fetchData, fetchItemDetails } from "../services/api";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { DeleteIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import BatteryIcon from "../components/BatteryIcon";
+import BucketIcon from "../components/BucketIcon";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+const customIcon = L.icon({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconSize: [25, 41], // اندازه آیکون
+  iconAnchor: [12, 41], // نقطه‌ای که آیکون به آن اشاره می‌کند
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 const HomePage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [doFetch, setDoFetch] = useState<boolean>(true);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [itemDetails, setItemDetails] = useState<any[]>([]);
+  const [Location, setLocation] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState<number>(5);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [bucketToDelete, setBucketToDelete] = useState<number | null>(null);
@@ -43,6 +60,12 @@ const HomePage: React.FC = () => {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isLocateOpen,
+    onOpen: onLocateOpen,
+    onClose: onLocateClose,
   } = useDisclosure();
 
   useEffect(() => {
@@ -66,6 +89,7 @@ const HomePage: React.FC = () => {
         );
         if (details && details.value && details.value.response) {
           setItemDetails(details.value.response);
+          // setItemDetailsMax(details.value.max);
         }
       };
       fetchDetails();
@@ -83,12 +107,17 @@ const HomePage: React.FC = () => {
     onDeleteOpen();
   };
 
+  const handleLocateClick = (loc: string, item: any) => {
+    setSelectedItem(item);
+    setLocation([loc.split(",")[0], loc.split(",")[1]]);
+    onLocateOpen();
+  };
+
   const handleDeleteConfirm = async () => {
     if (bucketToDelete !== null) {
       await deleteBucket(bucketToDelete, token);
       setBucketToDelete(null);
       onDeleteClose();
-      // Refresh data after deletion
       const result = await fetchData(token);
       if (result && result.value && result.value.response) {
         setData(result.value.response);
@@ -97,22 +126,27 @@ const HomePage: React.FC = () => {
   };
 
   const resetModal = () => {
-    // Reset when modal is closed
     setPageSize(5);
     setPageNumber(1);
     setItemDetails([]);
+    // setItemDetailsMax(0);
     onClose();
   };
 
-  const changePageNumber = (value: string) => {
-    setPageNumber(parseInt(value));
-    // Reset data when page number changes
+  const resetLocateModal = () => {
+    setLocation([]);
+    onLocateClose();
+  };
+
+  const changePageNumber = (value: number) => {
+    setPageNumber(value);
+    console.log(pageNumber);
     setItemDetails([]);
   };
 
   const changePageSize = (value: string) => {
     setPageSize(parseInt(value));
-    // Reset data when page size changes
+    console.log(pageSize);
     setItemDetails([]);
   };
 
@@ -128,17 +162,19 @@ const HomePage: React.FC = () => {
     >
       <Box maxW="6xl" w="100%" mb={8} textAlign="center">
         <Heading size="xl" mb={4}>
-          Welcome to GWM
+          <Flex alignItems="center" justifyContent="center">
+            Welcome to Smart Oil Meter Pro Panel
+            <img
+              src="\Logo-site.png"
+              alt="Logo"
+              style={{ width: "50px", height: "50px" }}
+            />
+          </Flex>
         </Heading>
         <Flex alignItems="center" justifyContent="center">
           <Heading size="md" fontWeight="normal" mr={4}>
-            Smart Oil Meter Pro Panel
+            German Waste Managment GmbH
           </Heading>
-          <img
-            src="\Logo-site.png"
-            alt="Logo"
-            style={{ width: "50px", height: "50px" }}
-          />
         </Flex>
       </Box>
 
@@ -157,10 +193,8 @@ const HomePage: React.FC = () => {
               <VStack align="start" spacing={3}>
                 <HStack justify="space-between" w="100%">
                   <Text fontSize="lg" fontWeight="bold" color="gray.700">
-                    Serial Number: {item.serialNumber}
+                    Serial Number : {item.serialNumber}
                   </Text>
-                  {/* اضافه کردن آیکون باطری */}
-                  <BatteryIcon batteryAmount={item.batteryAmount} />
                   <IconButton
                     aria-label="Delete bucket"
                     icon={<DeleteIcon />}
@@ -169,6 +203,51 @@ const HomePage: React.FC = () => {
                     onClick={() => handleDeleteClick(item.id)}
                   />
                 </HStack>
+                <Divider />
+
+                <HStack justify="space-between" w="100%">
+                  {item.deviceStatus == 1 ? (
+                    <Text fontSize="lg" fontWeight="bold" color="green.400">
+                      Connected!
+                    </Text>
+                  ) : (
+                    <Text fontSize="lg" fontWeight="bold" color="red.600">
+                      Disconnected! <WarningTwoIcon marginTop={"-4px"} />
+                    </Text>
+                  )}{" "}
+                  {/* فاصله بیشتر بین آیکون باطری و سطل */}
+                  <Flex alignItems="center" justify="space-between" gap="2">
+                    {item.location ? (
+                      <Button
+                        size="sm"
+                        colorScheme="red"
+                        onClick={() => handleLocateClick(item.location, item)}
+                      >
+                        Locate
+                      </Button>
+                    ) : null}
+                  </Flex>
+                </HStack>
+
+                <HStack justify="space-between" w="100%">
+                  <Text fontSize="lg" fontWeight="bold" color="gray.700">
+                    Battery :{" "}
+                  </Text>
+                  {/* فاصله بیشتر بین آیکون باطری و سطل */}
+                  <Flex alignItems="center" justify="space-between" gap="2">
+                    <BatteryIcon batteryAmount={item.batteryAmount} />
+                  </Flex>
+                </HStack>
+
+                <HStack justify="space-between" w="100%">
+                  <Text fontSize="lg" fontWeight="bold" color="gray.700">
+                    Tank :{" "}
+                  </Text>
+                  <Flex alignItems="center" justify="space-between" gap="2">
+                    <BucketIcon bucketAmount={item.tankVolume} />
+                  </Flex>
+                </HStack>
+
                 <Divider />
                 <Text color="gray.600">
                   Creation Date:{" "}
@@ -187,50 +266,33 @@ const HomePage: React.FC = () => {
         </Grid>
       </Box>
 
-      {/* Popup برای نمایش جزئیات */}
-      <Modal isOpen={isOpen} onClose={resetModal} size="xl">
+      {/* View Details Modal */}
+      <Modal isOpen={isOpen} onClose={resetModal} size="lg">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Item Details</ModalHeader>
           <ModalBody>
-            <Flex mb={4} align="center">
+            <Flex justify="space-between" align="center" mb={4}>
+              <Heading size="md">
+                Details for {selectedItem?.serialNumber}
+              </Heading>
               <Select
                 value={pageSize}
                 onChange={(e) => changePageSize(e.target.value)}
-                mr={4}
+                size="sm"
               >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={15}>15</option>
-                <option value={20}>20</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
               </Select>
-              <Text mr={2}>Page Size</Text>
-
-              <Select
-                value={pageNumber}
-                onChange={(e) => changePageNumber(e.target.value)}
-                ml={4}
-              >
-                {pageNumber === 1 ? null : (
-                  <option value={pageNumber - 1}>{pageNumber - 1}</option>
-                )}
-                <option value={pageNumber}>{pageNumber}</option>
-                <option value={pageNumber + 1}>{pageNumber + 1}</option>
-                <option value={pageNumber + 2}>{pageNumber + 2}</option>
-              </Select>
-              <Text ml={2}>Page Number</Text>
             </Flex>
 
-            {/* نمایش پیام "Nothing..." در صورت خالی بودن داده‌ها */}
             {itemDetails.length === 0 ? (
               <Text textAlign="center" color="gray.500" fontStyle="italic">
                 Nothing...
               </Text>
             ) : (
-              <Accordion
-                defaultIndex={itemDetails.map((_, i) => i)}
-                allowMultiple
-              >
+              <Accordion defaultIndex={[0]} allowMultiple>
                 {itemDetails.map((detail) => (
                   <AccordionItem key={detail.id}>
                     <h2>
@@ -268,17 +330,33 @@ const HomePage: React.FC = () => {
                 ))}
               </Accordion>
             )}
-          </ModalBody>
 
+            <Flex mt={4} justify="center">
+              <Button
+                onClick={() => changePageNumber(Math.max(1, pageNumber - 1))}
+                mr={2}
+                isDisabled={pageNumber == 1}
+              >
+                Previous
+              </Button>
+              <Button
+                onClick={() => changePageNumber(pageNumber + 1)}
+                ml={2}
+                isDisabled={itemDetails.length < pageSize}
+              >
+                Next
+              </Button>
+            </Flex>
+          </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={resetModal}>
+            <Button onClick={resetModal} colorScheme="teal">
               Close
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
 
-      {/* Modal تایید حذف */}
+      {/* Delete Confirmation Modal */}
       <Modal isOpen={isDeleteOpen} onClose={onDeleteClose}>
         <ModalOverlay />
         <ModalContent>
@@ -287,11 +365,44 @@ const HomePage: React.FC = () => {
             <Text>Are you sure you want to delete this bucket?</Text>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="red" mr={3} onClick={handleDeleteConfirm}>
-              Yes
+            <Button colorScheme="red" onClick={handleDeleteConfirm} mr={3}>
+              Delete
             </Button>
             <Button variant="ghost" onClick={onDeleteClose}>
-              No
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Locate Confirmation Modal */}
+      <Modal isOpen={isLocateOpen} onClose={onLocateClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            {selectedItem?.serialNumber} device location
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <MapContainer
+              center={[Number(Location[0]), Number(Location[1])]}
+              zoom={13}
+              style={{ height: "400px", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution="&copy; <a href='https://osm.org/copyright'>OpenStreetMap</a> contributors"
+              />
+              <Marker
+                position={[Number(Location[0]), Number(Location[1])]}
+                icon={customIcon}
+              />
+            </MapContainer>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button onClick={resetLocateModal} colorScheme="teal">
+              Close
             </Button>
           </ModalFooter>
         </ModalContent>

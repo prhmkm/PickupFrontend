@@ -26,7 +26,7 @@ export const login = async (username: string, password: string): Promise<{ token
 
 export const fetchData = async (token: string): Promise<any> => {
     try {
-        const response = await api.get('/Admin/Bucket/BOGetAllBuckets', {
+        const response = await api.get('/Admin/Device/BOGetAllDevices', {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -58,7 +58,7 @@ export const fetchItemDetails = async (id: number, token: string, pageSize: numb
 
 export const deleteBucket = async (id: number, token: string): Promise<any> => {
     try {
-        const response = await api.post(`/Admin/Bucket/BODeleteBucket`, null, {
+        const response = await api.post(`/Admin/Device/BODeleteDevice`, null, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 id: id.toString(),

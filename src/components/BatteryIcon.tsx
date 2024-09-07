@@ -8,17 +8,17 @@ interface BatteryIconProps {
 }
 
 const BatteryIcon: React.FC<BatteryIconProps> = ({ batteryAmount }) => {
-  // محاسبه درصد باتری از 3 (0%) تا 3.3 (100%)
+  // محاسبه درصد باتری از 3.9 (0%) تا 4.2 (100%)
   const batteryPercentage = Math.max(
-    Math.min(((batteryAmount - 3) / 0.3) * 100, 100),
+    Math.min(((batteryAmount - 3.9) / (4.2 - 3.9)) * 100, 100),
     0
   );
 
   // انتخاب رنگ بر اساس درصد باتری
   const getColor = () => {
-    if (batteryPercentage >= 80) return "green";
-    if (batteryPercentage >= 25) return "yellow";
-    return "red";
+    if (batteryPercentage >= 80) return "green.400";
+    if (batteryPercentage >= 25) return "yellow.400";
+    return "red.400";
   };
 
   // طراحی آیکون باتری
