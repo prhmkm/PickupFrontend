@@ -203,6 +203,14 @@ const HomePage: React.FC = () => {
                     onClick={() => handleDeleteClick(item.id)}
                   />
                 </HStack>
+                <Text
+                  fontSize="md"
+                  fontWeight="bold"
+                  color="teal.600"
+                  as="abbr"
+                >
+                  Phone Number : {item.phoneNumber}
+                </Text>
                 <Divider />
 
                 <HStack justify="space-between" w="100%">
