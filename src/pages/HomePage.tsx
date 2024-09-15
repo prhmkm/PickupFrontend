@@ -249,7 +249,7 @@ const HomePage: React.FC = () => {
 
                 <HStack justify="space-between" w="100%">
                   <Text fontSize="lg" fontWeight="bold" color="gray.700">
-                    Tank :{" "}
+                    Tank ({item.bucketHeight} cm) :{" "}
                   </Text>
                   <Flex alignItems="center" justify="space-between" gap="2">
                     <BucketIcon bucketAmount={item.tankVolume} />
