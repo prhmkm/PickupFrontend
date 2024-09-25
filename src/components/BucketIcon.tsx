@@ -8,10 +8,11 @@ interface BucketIconProps {
 }
 
 const BucketIcon: React.FC<BucketIconProps> = ({ bucketAmount }) => {
-  const bucketPercentage = Math.max(
-    Math.min(((bucketAmount - 0) / (100 - 0)) * 100, 100),
-    0
-  );
+  const bucketPercentage = bucketAmount;
+  // Math.max(
+  //   Math.min(((bucketAmount - 0) / (100 - 0)) * 100, 100),
+  //   0
+  // );
 
   const getColor = () => {
     if (bucketPercentage >= 75) return "red.400";
