@@ -211,6 +211,15 @@ const HomePage: React.FC = () => {
                 >
                   Phone Number : {item.phoneNumber}
                 </Text>
+                <Text
+                  fontSize="md"
+                  fontWeight="bold"
+                  color="teal.500"
+                  as="abbr"
+                >
+                  Day : {item.day} Sense : {item.sense}
+                </Text>
+
                 <Divider />
 
                 <HStack justify="space-between" w="100%">
