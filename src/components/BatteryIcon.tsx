@@ -8,9 +8,9 @@ interface BatteryIconProps {
 }
 
 const BatteryIcon: React.FC<BatteryIconProps> = ({ batteryAmount }) => {
-  // محاسبه درصد باتری از 1.75 (0%) تا 2.60 (100%)
+  // محاسبه درصد باتری از 3.5 (0%) تا 4.2 (100%)
   const batteryPercentage = Math.max(
-    Math.min(((batteryAmount - 1.75) / (2.6 - 1.75)) * 100, 100),
+    Math.min(((batteryAmount - 3.5) / (4.2 - 3.5)) * 100, 100),
     0
   );
 
