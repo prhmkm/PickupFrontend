@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-slate-100 text-slate-800 antialiased;
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+.gwm-gradient {
+  background: linear-gradient(135deg, #0f7b35 0%, #21b36a 45%, #6fda8d 100%);
+}
+
+.badge {
+  @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold;
+}
+
+.leaflet-map {
+  position: relative;
+  z-index: 0;
+}
+
+.leaflet-container,
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 0 !important;
+}
+
